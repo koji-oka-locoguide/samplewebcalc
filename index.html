@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Calculator</title>
+<meta name="robots" content="noindex">
+<style>
+  /* Notionに馴染むシンプルなデザイン */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    /* 背景を透明にしてNotionの背景色に合わせる */
+    background-color: transparent; 
+  }
+  .calculator {
+    width: 280px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #ebebeb;
+  }
+  .display {
+    background-color: #f7f7f5;
+    color: #37352f;
+    text-align: right;
+    padding: 24px 20px;
+    font-size: 2.5rem;
+    font-weight: 500;
+    box-sizing: border-box;
+    border-bottom: 1px solid #ebebeb;
+    word-break: break-all;
+    min-height: 90px;
+  }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  button {
+    padding: 18px;
+    font-size: 1.2rem;
+    border: none;
+    border-right: 1px solid #ebebeb;
+    border-bottom: 1px solid #ebebeb;
+    background-color: #ffffff;
+    color: #37352f;
+    cursor: pointer;
+    transition: background-color 0.1s;
+  }
+  button:active {
+    background-color: #e8e8e8;
+  }
+  button:hover {
+    background-color: #f0f0f0;
+  }
+  /* 右端と下端のボーダーを消す調整 */
+  button:nth-child(4n) { border-right: none; }
+  .buttons button:nth-last-child(-n+3) { border-bottom: none; }
+  
+  .operator {
+    background-color: #fef3c7;
+    color: #d97706;
+    font-weight: bold;
+  }
+  .operator:hover { background-color: #fde68a; }
+  .equals {
+    background-color: #2563eb;
+    color: white;
+  }
+  .equals:hover { background-color: #1d4ed8; }
+  .double {
+    grid-column: span 2;
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display" id="display">0</div>
+  <div class="buttons">
+    <button onclick="clearDisplay()" style="color: #ef4444;">C</button>
+    <button onclick="deleteLast()">DEL</button>
+    <button onclick="append('%')" class="operator">%</button>
+    <button onclick="append('/')" class="operator">÷</button>
+    
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button onclick="append('*')" class="operator">×</button>
+    
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button onclick="append('-')" class="operator">−</button>
+    
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button onclick="append('+')" class="operator">+</button>
+    
+    <button onclick="append('0')" class="double">0</button>
+    <button onclick="append('.')">.</button>
+    <button onclick="calculate()" class="equals">=</button>
+  </div>
+</div>
+
+<script>
+  let display = document.getElementById('display');
+
+  function append(val) {
+    if (display.innerText === '0' && val !== '.') {
+      display.innerText = val;
+    } else {
+      // 演算子が見た目用になっているので、計算用の記号に変換して表示
+      let showVal = val;
+      if (val === '*') showVal = '*';
+      if (val === '/') showVal = '/';
+      display.innerText += showVal;
+    }
+  }
+
+  function clearDisplay() {
+    display.innerText = '0';
+  }
+
+  function deleteLast() {
+    if (display.innerText === 'Error') {
+      clearDisplay();
+      return;
+    }
+    display.innerText = display.innerText.slice(0, -1);
+    if (display.innerText === '') {
+      display.innerText = '0';
+    }
+  }
+
+  function calculate() {
+    try {
+      // 安全な計算処理
+      let expression = display.innerText.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+      // evalを使わずFunctionコンストラクタで計算（簡易的なXSS対策）
+      let result = new Function('return ' + expression)();
+      
+      // 割り切れない小数の処理
+      if (!Number.isInteger(result)) {
+        result = parseFloat(result.toFixed(8)); 
+      }
+      display.innerText = result;
+    } catch(e) {
+      display.innerText = 'Error';
+    }
+  }
+</script>
+
+</body>
+</html>
