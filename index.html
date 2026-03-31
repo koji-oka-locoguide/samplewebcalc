@@ -228,7 +228,7 @@
         expressionStr = previousValue + ' ' + opSymbol + ' ' + currentValue + ' =';
       }
 
-      // Avoid floating point display issues
+      // toPrecision(12) avoids floating point display issues (e.g. 0.1 + 0.2 = 0.3)
       currentValue = parseFloat(result.toPrecision(12)).toString();
       operator = null;
       previousValue = '';
